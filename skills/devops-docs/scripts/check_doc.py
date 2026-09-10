@@ -44,8 +44,25 @@ SLOP = [
     ("Filler opener",       re.compile(r"(?i)in today's (?:fast[- ]paced|modern|digital)")),
     ("Vague follow-up",     re.compile(r'(?i)if the (?:issue|problem) persists,? (?:investigate further|contact support|try again)')),
     ("Unfilled placeholder", re.compile(r'(?i)\b(?:your-namespace|your-cluster|example\.com/your|my-app|foo-bar)\b')),
-    ("Undated cost figure", re.compile(r'(?m)^(?=.*[≈~$])(?=.*\d)(?!.*(?:as of|20\d\d-\d\d-\d\d)).*\$\s?\d[\d,]*(?:\.\d+)?\s*(?:/\s*(?:mo|month|hr|hour))')),
 ]
+
+# Checked with surrounding context rather than a single line, so a date
+# stated once above a table of prices covers the whole table.
+COST_PRICE = re.compile(r'[≈~]?\$\s?\d[\d,]*(?:\.\d+)?\s*(?:/\s*(?:mo|month|hr|hour))', re.I)
+COST_DATE = re.compile(r'(?i)\bas of\b|\b20\d\d-\d\d-\d\d\b')
+COST_CONTEXT_LINES = 6
+
+
+def find_undated_costs(lines):
+    warnings = []
+    for i, line in enumerate(lines):
+        if not COST_PRICE.search(line):
+            continue
+        window = lines[max(0, i - COST_CONTEXT_LINES):i + 1]
+        if not any(COST_DATE.search(w) for w in window):
+            warnings.append((i + 1, "Undated cost figure", line.strip()[:80]))
+    return warnings
+
 
 REQUIRED_HINTS = [
     ("no owner named",     re.compile(r'(?i)\bowner\b|\bon-?call\b|\bescalat')),
@@ -64,15 +81,20 @@ def check(path, strict=False):
     lines = text.splitlines()
     blocking, warnings = [], []
 
+    # Blocking findings never carry a snippet: the match IS (or contains) the
+    # credential, and this tool must not do the thing it exists to prevent —
+    # putting a credential value in output, even partially. See SKILL.md.
     for label, pattern in SECRETS:
         for m in pattern.finditer(text):
             line_no = text[:m.start()].count("\n") + 1
-            blocking.append((line_no, label, lines[line_no - 1][:80] if line_no <= len(lines) else ""))
+            blocking.append((line_no, label))
 
     for label, pattern in SLOP:
         for m in pattern.finditer(text):
             line_no = text[:m.start()].count("\n") + 1
             warnings.append((line_no, label, lines[line_no - 1][:80] if line_no <= len(lines) else ""))
+
+    warnings.extend(find_undated_costs(lines))
 
     for label, pattern in REQUIRED_HINTS:
         if not pattern.search(text):
@@ -81,9 +103,9 @@ def check(path, strict=False):
     print(f"\n{path}")
     if blocking:
         print(f"  BLOCKING — {len(blocking)} possible credential(s). Do not deliver this file.")
-        for line_no, label, snippet in blocking:
+        for line_no, label in sorted(blocking):
             print(f"    line {line_no}: {label}")
-            print(f"      {snippet.strip()[:70]}")
+        print("    (values withheld — this tool never prints credential contents; open the file at these lines)")
     if warnings:
         print(f"  {len(warnings)} warning(s):")
         for line_no, label, snippet in warnings:

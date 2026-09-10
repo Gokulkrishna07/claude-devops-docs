@@ -47,6 +47,14 @@ class CheckDocTests(unittest.TestCase):
         self.assertIn("AWS access key id", output)
         self.assertIn("AWS secret access key", output)
 
+    def test_blocking_findings_never_print_secret_values(self):
+        # check_doc.py must not do the thing it exists to prevent: putting a
+        # credential value in its own output, even partially.
+        _, output = run_check(os.path.join(FIXTURE_DOCS, "bad_doc.md"))
+        self.assertNotIn("AKIAIOSFODNN7EXAMPLE", output)
+        self.assertNotIn("wJalrXUtnFEMI", output)
+        self.assertIn("values withheld", output)
+
     def test_bad_doc_warns_on_slop_patterns(self):
         _, output = run_check(os.path.join(FIXTURE_DOCS, "bad_doc.md"))
         for label in (
@@ -55,8 +63,16 @@ class CheckDocTests(unittest.TestCase):
             "Generic best practices heading",
             "Conclusion section",
             "Filler opener",
+            "Undated cost figure",
         ):
             self.assertIn(label, output)
+
+    def test_dated_cost_table_is_not_flagged(self):
+        # A date stated once above a table of prices should cover every row,
+        # not just the one line it's adjacent to.
+        code, output = run_check(os.path.join(FIXTURE_DOCS, "dated_cost_header.md"))
+        self.assertEqual(code, 0)
+        self.assertNotIn("Undated cost figure", output)
 
     def test_missing_file_reports_error_without_crash(self):
         code, output = run_check(os.path.join(FIXTURE_DOCS, "does_not_exist.md"))

@@ -1,6 +1,6 @@
 {
   "name": "devops-docs",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Operational and infrastructure documentation that a stranger can actually use — infra docs with diagrams and costs, pipeline docs, unified platform docs, runbooks, ADRs, postmortems.",
   "license": "MIT",
   "entry": "skills/devops-docs/SKILL.md",
