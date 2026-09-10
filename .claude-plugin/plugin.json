@@ -1,0 +1,12 @@
+{
+  "name": "devops-docs",
+  "description": "Operational documentation that a stranger can actually use — runbooks, service docs, ADRs, postmortems, and on-call onboarding, written for the engineer who gets paged at 3am and has never seen your system.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Gokulkrishna07",
+    "url": "https://github.com/Gokulkrishna07"
+  },
+  "homepage": "https://github.com/Gokulkrishna07/claude-devops-docs",
+  "license": "MIT",
+  "keywords": ["devops", "sre", "documentation", "runbook", "on-call", "postmortem", "kubernetes"]
+}

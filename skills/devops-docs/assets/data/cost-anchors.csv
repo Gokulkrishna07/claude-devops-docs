@@ -1,0 +1,20 @@
+# Cost anchors — order-of-magnitude sanity check ONLY.
+#
+# This file ships UNPOPULATED by design. A skill whose central rule is "never
+# state a price from memory" cannot also ship a table of prices that goes stale
+# the moment it is committed. Populating it from a real source is a local
+# decision with a local expiry date.
+#
+# To populate, run one of these YOURSELF (this skill will not run them for you):
+#   infracost breakdown --path . --format json
+#   aws pricing get-products --service-code AmazonRDS --region us-east-1
+#   gcloud billing accounts list && gcloud beta billing budgets list
+#
+# Rules for any row added here:
+#   - as_of must be a real date; delete rows older than 6 months
+#   - source_url must be the provider's own pricing page or API, not a blog
+#   - never use this file as the source cited in a document; cite the provider
+#   - if a live source disagrees with a row here, the live source wins and the
+#     row is stale — fix or delete it
+#
+provider,service,sku,region,unit,list_price,currency,pricing_model,as_of,source_url

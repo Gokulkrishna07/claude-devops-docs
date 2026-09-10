@@ -1,0 +1,16 @@
+{
+  "name": "devops-docs",
+  "version": "0.2.0",
+  "description": "Operational and infrastructure documentation that a stranger can actually use — infra docs with diagrams and costs, pipeline docs, unified platform docs, runbooks, ADRs, postmortems.",
+  "license": "MIT",
+  "entry": "skills/devops-docs/SKILL.md",
+  "keywords": ["devops", "sre", "documentation", "runbook", "terraform", "opentofu", "kubernetes", "ci-cd", "jenkins", "ansible", "architecture-diagram", "cloud-cost", "on-call", "postmortem"],
+  "requirements": {
+    "python": ">=3.8",
+    "optional": {
+      "diagrams": "provider-icon architecture diagrams (also needs the Graphviz `dot` binary)",
+      "pyyaml": "reading the diagram spec file",
+      "infracost": "real cost figures from a Terraform plan"
+    }
+  }
+}

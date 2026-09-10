@@ -1,0 +1,14 @@
+{
+  "name": "devops-docs-marketplace",
+  "owner": {
+    "name": "Gokulkrishna07",
+    "url": "https://github.com/Gokulkrishna07"
+  },
+  "plugins": [
+    {
+      "name": "devops-docs",
+      "source": "./",
+      "description": "Infrastructure, pipeline, and platform documentation with architecture diagrams and costs — plus runbooks, ADRs and postmortems. Written for the cold pager, not for the author."
+    }
+  ]
+}

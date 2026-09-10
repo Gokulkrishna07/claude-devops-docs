@@ -1,0 +1,69 @@
+# Architecture diagram spec.
+#
+# Render:
+#   python3 scripts/gen_diagram.py architecture.yaml -o docs/architecture
+#   python3 scripts/gen_diagram.py architecture.yaml --backend mermaid
+#
+# Node `type` is a path into the `diagrams` package: provider.category.ClassName.
+# Browse valid values at https://diagrams.mingrammer.com/docs/nodes/aws
+# Omit `type` for a plain box.
+
+title: "3D Product Visualization on AWS"
+direction: LR
+output: docs/architecture
+
+# Nodes outside any group sit outside the cloud boundary.
+nodes:
+  - id: src
+    label: "Source Code"
+    type: generic.blank.Blank
+  - id: browser
+    label: "Client Web Browser"
+    type: generic.device.Tablet
+
+groups:
+  - name: "AWS Cloud"
+    groups:
+      - name: "Runtime Infrastructure"
+        nodes:
+          - id: cloudfront
+            label: "Amazon CloudFront"
+            type: aws.network.CloudFront
+          - id: s3
+            label: "Amazon S3"
+            type: aws.storage.S3
+
+      - name: "Render Infrastructure"
+        nodes:
+          - id: gamelift
+            label: "Amazon GameLift"
+            type: aws.game.Gamelift
+
+      - name: "Build Infrastructure"
+        nodes:
+          - id: pipeline
+            label: "AWS CodePipeline"
+            type: aws.devtools.Codepipeline
+          - id: build
+            label: "AWS CodeBuild"
+            type: aws.devtools.Codebuild
+          - id: ecr
+            label: "Amazon ECR"
+            type: aws.compute.EC2ContainerRegistry
+
+    nodes:
+      - id: lambda_edge
+        label: "AWS Lambda@Edge"
+        type: aws.compute.Lambda
+
+# Numbered labels match the numbered callouts in the prose beneath the diagram.
+edges:
+  - {from: src,         to: pipeline,    label: "1"}
+  - {from: pipeline,    to: build,       label: "2"}
+  - {from: ecr,         to: build,       label: "3"}
+  - {from: build,       to: s3,          label: "4"}
+  - {from: browser,     to: cloudfront,  label: "5", bidirectional: true}
+  - {from: cloudfront,  to: s3,          label: "6", bidirectional: true}
+  - {from: browser,     to: lambda_edge, label: "7"}
+  - {from: lambda_edge, to: gamelift,    label: "8"}
+  - {from: gamelift,    to: s3}
